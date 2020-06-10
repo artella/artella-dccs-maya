@@ -1,0 +1,1 @@
+# artella-dcc-maya
