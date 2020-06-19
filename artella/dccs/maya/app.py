@@ -9,6 +9,7 @@ from __future__ import print_function, division, absolute_import
 
 import os
 import string
+import logging
 import platform
 import traceback
 
@@ -16,8 +17,9 @@ import maya.cmds as cmds
 import maya.mel as mel
 import maya.utils as utils
 
-from artella import logger
 from artella.dccs.maya import utils as maya_utils
+
+logger = logging.getLogger('artella')
 
 
 def name():
@@ -185,7 +187,7 @@ def reference_scene(file_path, **kwargs):
             if use_rename:
                 namespace = cmds.optionVar(q='referenceOptionsRenamePrefix')
                 rsp = cmds.file(file_path, reference=True, mergeNamespacesOnClash=False, namespace=namespace)
-                logger.log_debug(
+                logger.debug(
                     '{} = file({}, reference=True, mergeNamespacesOnClash=False, namespace={})'.format(
                         rsp, file_path, namespace))
             else:
@@ -194,7 +196,7 @@ def reference_scene(file_path, **kwargs):
                 if split_name:
                     namespace = string.join(split_name[:-1], '_')
                 rsp = cmds.file(file_path, reference=True, mergeNamespacesOnClash=False, namespace=namespace)
-                logger.log_debug(
+                logger.debug(
                     '{} = file({}, reference=True, mergeNamespacesOnClash=False, namespace={})'.format(
                         rsp, file_path, namespace))
     except Exception as exc:
@@ -203,7 +205,7 @@ def reference_scene(file_path, **kwargs):
         return False
 
     new_nodes = track_nodes.get_delta()
-    logger.log_info('Maya reference event referenced {} nodes'.format(len(new_nodes)))
+    logger.info('Maya reference event referenced {} nodes'.format(len(new_nodes)))
 
     return True
 

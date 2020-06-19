@@ -8,18 +8,20 @@ Module that contains Maya DCC plugin specific implementation
 from __future__ import print_function, division, absolute_import
 
 import os
+import logging
 
 import maya.cmds as cmds
 import maya.mel as mel
 import maya.OpenMaya as OpenMaya
 
 import artella
-from artella import dcc
-from artella import logger
-from artella import register
+import artella.dcc as dcc
+import artella.register as register
 from artella.core import consts, callback, dccplugin
 from artella.core.utils import Singleton
 from artella.dccs.maya import utils as maya_utils
+
+logger = logging.getLogger('artella')
 
 
 class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
@@ -80,7 +82,7 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
         cmds.workspace(fileRule=['scene', ''])
         cmds.workspace(fileRule=['mayaAscii', ''])
         cmds.workspace(fileRule=['mayaBinary', ''])
-        logger.log_info('Set Maya Workspace Path: {}'.format(artella_local_root_path))
+        logger.info('Set Maya Workspace Path: {}'.format(artella_local_root_path))
 
     def validate_environment_for_callback(self, callback_name):
         """
@@ -89,13 +91,13 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
         :param str callback_name: name of the callback to validate
         """
 
-        logger.log_info('validate_environment_for_callback for {}'.format(callback_name))
+        logger.info('validate_environment_for_callback for {}'.format(callback_name))
         client = self.get_client()
         if client:
             local_root = cmds.encodeString(client.get_local_root())
             if local_root:
                 # We use this to make sure that Artella environment variable is set
-                logger.log_debug('set local root in local environment: {}'.format(local_root))
+                logger.debug('set local root in local environment: {}'.format(local_root))
                 os.environ[consts.ALR] = local_root
                 os.putenv(consts.ALR, local_root)
                 mel.eval('putenv "{}" "{}"'.format(consts.ALR, local_root))
@@ -103,7 +105,7 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
             if consts.ALR not in os.environ:
                 msg = 'Unable to execute Maya "{}" callback, {} is not set in the environment'.format(
                     callback_name, consts.ALR)
-                logger.log_error(msg)
+                logger.error(msg)
                 raise Exception(msg)
 
     # ==============================================================================================================
@@ -131,7 +133,7 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
         is_locked, _, _, _ = self.check_lock()
         valid_lock = self.lock_file(force=True, show_dialogs=False)
         if not valid_lock:
-            logger.log_error('Unable to checkout file. Paths cannot be updated automatically.')
+            logger.error('Unable to checkout file. Paths cannot be updated automatically.')
             return
 
         self.update_paths(show_dialogs=False, skip_save=True)
@@ -151,15 +153,15 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
         self.validate_environment_for_callback('BeforeOpenCheck')
 
         file_path = maya_file.resolvedFullName()
-        logger.log_info('Opening file: "{}"'.format(file_path))
+        logger.info('Opening file: "{}"'.format(file_path))
 
-        logger.log_info('Checking missing dependencies ...')
+        logger.info('Checking missing dependencies ...')
 
         get_deps_plugin = artella.PluginsMgr().get_plugin_by_id('artella-plugins-getdependencies')
         if not get_deps_plugin or not get_deps_plugin.is_loaded():
             msg = 'Get Dependencies plugin is not loaded. Get dependencies functionality is not available!'
             dcc.show_warning('Get Dependencies Plugin not available', msg)
-            logger.log_warning(msg)
+            logger.warning(msg)
 
         get_deps_plugin.get_non_available_dependencies(file_path)
 

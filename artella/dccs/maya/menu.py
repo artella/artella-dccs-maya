@@ -7,10 +7,12 @@ Module that contains Maya DCC menu functions
 
 from __future__ import print_function, division, absolute_import
 
+import logging
+
 import maya.cmds as cmds
 import maya.mel as mel
 
-from artella import logger
+logger = logging.getLogger('artella')
 
 
 def main_menu_toolbar():
@@ -84,13 +86,13 @@ def add_menu(menu_name, parent_menu=None, tear_off=True, **kwargs):
         parent_menu = main_menu_toolbar()
 
     if check_menu_exists(menu_name):
-        logger.log_warning('Menu "{}" already exists. Skipping creation.'.format(menu_name))
+        logger.warning('Menu "{}" already exists. Skipping creation.'.format(menu_name))
         return None
 
     native_menu_name = '{}Menu'.format(menu_name.replace(' ', ''))
     native_menu = cmds.menu(native_menu_name, parent=parent_menu, tearOff=tear_off, label=menu_name)
     if not native_menu:
-        logger.log_warning('Impossible to create native Maya menu "{}"'.format(menu_name))
+        logger.warning('Impossible to create native Maya menu "{}"'.format(menu_name))
         return None
 
     return native_menu

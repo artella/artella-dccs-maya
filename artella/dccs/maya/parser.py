@@ -8,16 +8,16 @@ Module that contains Maya DCC scene file parser implementation
 from __future__ import print_function, division, absolute_import
 
 import os
+import logging
 
 import artella
-from artella import dcc
-from artella import logger
-from artella import register
+import artella.dcc as dcc
+import artella. register as register
 from artella.core import utils, qtutils, splash
 from artella.core.dcc import parser
 
 if qtutils.QT_AVAILABLE:
-    from artella.externals.Qt import QtCore, QtWidgets
+    from artella.externals.Qt import QtWidgets
 
 MAYA_AVAILBLE = True
 try:
@@ -25,6 +25,8 @@ try:
     from artella.dccs.maya import utils as maya_utils
 except ImportError:
     MAYA_AVAILBLE = False
+
+logger = logging.getLogger('artella')
 
 
 class MayaSceneParser(parser.AbstractSceneParser, object):
@@ -48,7 +50,7 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
             file_path = dcc.scene_name()
 
         if not file_path or not os.path.isfile(file_path):
-            logger.log_warning('Given file to parse does not exists! Skipping parsing process ...'.format(file_path))
+            logger.warning('Given file to parse does not exists! Skipping parsing process ...'.format(file_path))
             return list()
 
         file_path = utils.clean_path(file_path)
@@ -58,7 +60,7 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
         elif file_ext == '.mb':
             parser = MayaSceneParser.MayaBinaryParser()
         else:
-            logger.log_warning(
+            logger.warning(
                 'Given file path extension ({}) is not a recognized Maya file extension (.ma, .mb).'.format(file_ext))
             return list()
 
@@ -81,19 +83,19 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
         """
 
         if not MAYA_AVAILBLE:
-            logger.log_warning('Convert Paths functionality is only available if Maya instance is running!')
+            logger.warning('Convert Paths functionality is only available if Maya instance is running!')
             return False
 
         if not file_path:
             file_path = dcc.scene_name()
 
         if not file_path or not os.path.isfile(file_path):
-            logger.log_warning('Given file to parse does not exists! Skipping convert paths process'.format(file_path))
+            logger.warning('Given file to parse does not exists! Skipping convert paths process'.format(file_path))
             return False
 
         file_ext = os.path.splitext(file_path)[-1]
         if file_ext not in dcc.extensions():
-            logger.log_warning(
+            logger.warning(
                 'Given file path has an invalid extension: {}. Supported extensions: {}'.format(
                     file_ext, dcc.extensions()))
             return False
@@ -104,7 +106,7 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
         cmds.filePathEditor(refresh=True)
         dirs = cmds.filePathEditor(query=True, listDirectories='')
         if not dirs:
-            logger.log_debug('File "{}" has no paths to update!'.format(dirs))
+            logger.debug('File "{}" has no paths to update!'.format(dirs))
             return False
 
         valid_update = True
@@ -114,7 +116,7 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
             try:
                 file_path_editor = cmds.filePathEditor(query=True, listFiles=dir_name, withAttribute=True)
             except Exception as exc:
-                logger.log_error(
+                logger.error(
                     'Querying scene files in dir "{}" looking for dependent files: {}'.format(dir_name, exc))
                 return
             if not file_path_editor:
@@ -132,7 +134,7 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
                 translated_path = utils.clean_path(os.path.join(maya_dir, file_name))
                 converted_path = artella.DccPlugin().convert_path(translated_path)
 
-                logger.log_info(
+                logger.info(
                     'Converting Path: {} | {} >>>>>>> {}'.format(node_attr_name, maya_file_path, converted_path))
                 res = self._update_attr_path(node_attr_name, converted_path)
                 if not res:
@@ -151,27 +153,27 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
                 try:
                     maya_utils.unload_reference(node_name)
                 except RuntimeError as exc:
-                    logger.log_error(
+                    logger.error(
                         'Encountered an error while attempting to unload reference file: "{}" | {}'.format(
                             node_name, exc))
                     valid_update = False
             try:
                 maya_utils.load_reference(file_path, node_name)
             except RuntimeError as exc:
-                logger.log_error(
+                logger.error(
                     'Encountered an error while attempting to load reference file "{}" '
                     'using the updated file path: "{}" | {}'.format(node_name, file_path, exc))
                 valid_update = False
         else:
             if '.' not in node_attr_name:
-                logger.log_warning(
+                logger.warning(
                     'Unable to identify attribute of {} for file value {}'.format(node_attr_name, file_path))
                 return False
 
             try:
                 attr_value = cmds.getAttr(node_attr_name, sl=True)
             except Exception as exc:
-                logger.log_warning('Unable to query attributes for "{}" | {}'.format(node_attr_name, exc))
+                logger.warning('Unable to query attributes for "{}" | {}'.format(node_attr_name, exc))
                 return False
 
             if isinstance(attr_value, list):
@@ -196,7 +198,7 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
             new_value = cmds.getAttr(node_attr_name, sl=True)
             if new_value != file_path:
                 valid_update = False
-                logger.log_warning(
+                logger.warning(
                     'Attempted {} updated was not successful for {} current value is {}'.format(
                         node_attr_name, file_path, new_value))
             else:
@@ -466,7 +468,7 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
             elif magic_number == 'FOR8':
                 iff_format = self.MAYA_BINARY_64
             else:
-                logger.log_error('Bad magic number found in Maya Binary File. Was not possible to read!')
+                logger.error('Bad magic number found in Maya Binary File. Was not possible to read!')
                 return
 
             self._maya64 = iff_format == self.MAYA_BINARY_64

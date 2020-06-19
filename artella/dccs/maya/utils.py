@@ -9,6 +9,7 @@ from __future__ import print_function, division, absolute_import
 
 import os
 import struct
+import logging
 from collections import namedtuple
 from contextlib import contextmanager
 
@@ -16,10 +17,11 @@ import maya.cmds as cmds
 import maya.mel as mel
 import maya.OpenMayaUI as OpenMayaUI
 
-from artella import logger
 from artella.core import qtutils
 
 from artella.externals.Qt import QtWidgets
+
+logger = logging.getLogger('artella')
 
 
 def force_mel_stack_trace_on():
@@ -36,7 +38,7 @@ def force_mel_stack_trace_on():
             if last_focused_command_reporter and last_focused_command_reporter != '':
                 mel.eval('synchronizeScriptEditorOption 1 $stackTraceMenuItemSuffix')
     except Exception as exc:
-        logger.log_debug(str(exc))
+        logger.debug(str(exc))
 
 
 def get_maya_window():
@@ -134,7 +136,7 @@ def get_reference_file(reference_node, without_copy_number=True):
     """
 
     if not is_reference_node(reference_node) and not is_referenced_node(reference_node):
-        logger.log_warning(
+        logger.warning(
             'Node "{}" is not a valid reference node or a node from a reference file!'.format(reference_node))
         return ''
 
@@ -157,7 +159,7 @@ def replace_reference(reference_node, reference_file_path):
         return False
 
     if get_reference_file(reference_node, without_copy_number=True) == reference_file_path:
-        logger.log_warning('Reference "{}" already referencing "{}"!'.format(reference_node, reference_file_path))
+        logger.warning('Reference "{}" already referencing "{}"!'.format(reference_node, reference_file_path))
         return False
 
     if reference_file_path.endswith('.ma'):
@@ -165,12 +167,12 @@ def replace_reference(reference_node, reference_file_path):
     elif reference_file_path.endswith('.mb'):
         ref_type = 'mayaBinary'
     else:
-        logger.log_warning('Invalid file type for reference file path: "{}"'.format(reference_file_path))
+        logger.warning('Invalid file type for reference file path: "{}"'.format(reference_file_path))
         return False
 
     cmds.file(reference_file_path, loadReference=reference_node, typ=ref_type, options='v=0')
 
-    logger.log_debug('Replaced reference "{}" using file: "{}"'.format(reference_node, reference_file_path))
+    logger.debug('Replaced reference "{}" using file: "{}"'.format(reference_node, reference_file_path))
 
     return reference_file_path
 
@@ -187,7 +189,7 @@ def unload_reference(reference_node):
 
     is_loaded = cmds.file(referenceNode=reference_node, unloadReference=True)
 
-    # logger.log_debug('Unloaded reference "{}"! ("{}")'.format(reference_node, get_reference_file(reference_node)))
+    # logger.debug('Unloaded reference "{}"! ("{}")'.format(reference_node, get_reference_file(reference_node)))
 
     return is_loaded
 
@@ -202,7 +204,7 @@ def load_reference(file_path, reference_name):
 
     is_loaded = cmds.file(file_path, loadReference=reference_name)
 
-    logger.log_debug('Loaded reference "{}"! ("{}")'.format(reference_name, file_path))
+    logger.debug('Loaded reference "{}"! ("{}")'.format(reference_name, file_path))
 
     return is_loaded
 
@@ -219,7 +221,7 @@ def reload_reference(reference_node):
 
     is_loaded = cmds.file(referenceNode=reference_node, loadReference=True)
 
-    logger.log_debug('Reloaded reference "{}"! ("{}")'.format(reference_node, get_reference_file(reference_node)))
+    logger.debug('Reloaded reference "{}"! ("{}")'.format(reference_node, get_reference_file(reference_node)))
 
     return is_loaded
 
@@ -236,7 +238,7 @@ def reload_textures():
             texture_file_path = cmds.getAttr(texture + ".fileTextureName")
             cmds.setAttr(texture + ".fileTextureName", texture_file_path, type="string")
     except Exception as exc:
-        logger.log_warning('Error while reloading textures: {}'.format(exc))
+        logger.warning('Error while reloading textures: {}'.format(exc))
     finally:
         cmds.waitCursor(state=False)
 
@@ -254,7 +256,7 @@ def reload_dependencies():
         try:
             cmds.file(referenceNode=ref_node, loadReference=True)
         except RuntimeError:
-            logger.log_warning('Impossible to reload reference: {}'.format(ref_node))
+            logger.warning('Impossible to reload reference: {}'.format(ref_node))
 
 
 class TrackNodes(object):
@@ -479,13 +481,13 @@ class IffParser(object):
 
     def _get_header_struct(self, iff_format):
         if iff_format.endianness not in self.ENDIAN_FORMATS:
-            logger.log_error('Iff: Invalid endianess.')
+            logger.error('Iff: Invalid endianess.')
             return False
         if iff_format.typeid_bytes not in self.BYTE_FORMATS:
-            logger.log_error('Iff: Invalid typeid format.')
+            logger.error('Iff: Invalid typeid format.')
             return False
         if iff_format.size_bytes not in self.BYTE_FORMATS:
-            logger.log_error('Iff: Invalid size format.')
+            logger.error('Iff: Invalid size format.')
             return False
 
         typeid_padding = 'x' * max(0, iff_format.header_alignment - iff_format.typeid_bytes)
@@ -733,7 +735,7 @@ class MayaIffParser(IffParser, object):
 
         # Didn't get all three units (this is non standard)
         if angle_unit or linear_unit or time_unit:
-            logger.log_warning('Not all three units (angle, linear, time) were retrieved. Non-standard behaviour!')
+            logger.warning('Not all three units (angle, linear, time) were retrieved. Non-standard behaviour!')
 
     def _parse_file_reference(self):
         for chunk in self._iter_chunks(types=[IffChunks.FREF]):

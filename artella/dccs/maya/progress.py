@@ -7,12 +7,15 @@ Module that contains Maya DCC progress bar implementation
 
 from __future__ import print_function, division, absolute_import
 
+import logging
+
 import maya.cmds as cmds
 
-from artella import logger
-from artella import register
+import artella.register as register
 from artella.core.dcc import progress
 from artella.dccs.maya import utils
+
+logger = logging.getLogger('artella')
 
 
 class MayaProgressBar(progress.AbstractProgressBar, object):
@@ -328,7 +331,7 @@ class MayaProgressBar(progress.AbstractProgressBar, object):
         Internal function that logs current progress into DCC output window
         """
 
-        logger.log_debug('{} - {}'.format(self._status, self._count))
+        logger.debug('{} - {}'.format(self._status, self._count))
 
 
 register.register_class('ProgressBar', MayaProgressBar)
