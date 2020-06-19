@@ -1,3 +1,5 @@
 # ===================================================================
-# artella-dcc-maya requirements file
+# artella-dccs-maya requirements file
 # ===================================================================
+
+artella-plugins-core

@@ -1,0 +1,4 @@
+include versioneer.py
+include artella/dccs/maya/_version.py
+include artella/dccs/maya/typeids.dat
+recursive-exclude * *.py[co]
