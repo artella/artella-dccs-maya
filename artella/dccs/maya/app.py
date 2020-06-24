@@ -294,3 +294,18 @@ def execute_deferred(fn):
     """
 
     utils.executeDeferred(fn)
+
+
+def register_dcc_resource_path(resources_path):
+    """
+    Registers path into given DCC so it can find specific resources
+    :param resources_path: str, path we want DCC to register
+    """
+
+    if not os.path.isdir(resources_path):
+        return
+
+    if not os.environ.get('XBMLANGPATH', None):
+        os.environ['XBMLANGPATH'] = resources_path
+    else:
+        os.environ['XBMLANGPATH'] = os.environ['XBMLANGPATH'] + os.pathsep + resources_path
