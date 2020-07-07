@@ -35,9 +35,12 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
 
         self._references_found = list()
 
-    def init(self, dev=False):
+    def init(self, dev=False, show_dialogs=True):
         """
         Initializes Artella DCC plugin
+
+        :param bool dev: Whether plugin is initialized in development mode or not
+        :param bool show_dialogs: Whether dialogs should appear during plugin initialization or not
         :return: True if the initialization was successful; False otherwise
         :rtype: bool
         """
@@ -45,7 +48,7 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
         # Force Maya MEL stack trace on before we start using the plugin
         maya_utils.force_mel_stack_trace_on()
 
-        super(ArtellaMayaPlugin, self).init(dev=dev)
+        super(ArtellaMayaPlugin, self).init(dev=dev, show_dialogs=show_dialogs)
 
         # Register Maya specific callbacks
         callback.register(artella.Callbacks.AfterOpenCallback, self._after_open)
