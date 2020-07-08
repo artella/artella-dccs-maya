@@ -122,6 +122,9 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
         :param args:
         """
 
+        if not self.is_artella_path():
+            return
+
         self.validate_environment_for_callback('AfterOpen')
 
     def _before_save(self, *args):
@@ -130,6 +133,9 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
 
         :param args:
         """
+
+        if not self.is_artella_path():
+            return
 
         self.validate_environment_for_callback('BeforeSave')
 
@@ -152,6 +158,9 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
         :param MFileObject maya_file: Maya API object that contains info about the file we want to open
         :param dict client_data:
         """
+
+        if not self.is_artella_path():
+            return
 
         self.validate_environment_for_callback('BeforeOpenCheck')
 
@@ -177,6 +186,9 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
         :param args:
         """
 
+        if not self.is_artella_path():
+            return
+
         self.validate_environment_for_callback('AfterLoadReference')
 
     def _before_reference_check(self, retcode, maya_file, client_data=None):
@@ -188,7 +200,8 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
         :param dict client_data:
         """
 
-        self.validate_environment_for_callback('BeforeReferenceCheck')
+        if self.is_artella_path():
+            self.validate_environment_for_callback('BeforeReferenceCheck')
 
         # NOTE: With this code we can force the update of file paths when opening a reference file.
         # For now it's disabled because it's something that maybe it's not interesting from an user perspective.
