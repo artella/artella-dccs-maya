@@ -159,23 +159,21 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
         :param dict client_data:
         """
 
-        if not self.is_artella_path():
-            return
-
-        self.validate_environment_for_callback('BeforeOpenCheck')
-
         file_path = maya_file.resolvedFullName()
-        logger.info('Opening file: "{}"'.format(file_path))
 
-        logger.info('Checking missing dependencies ...')
+        if self.is_artella_path(file_path):
 
-        get_deps_plugin = artella.PluginsMgr().get_plugin_by_id('artella-plugins-getdependencies')
-        if not get_deps_plugin or not get_deps_plugin.is_loaded():
-            msg = 'Get Dependencies plugin is not loaded. Get dependencies functionality is not available!'
-            dcc.show_warning('Get Dependencies Plugin not available', msg)
-            logger.warning(msg)
+            logger.info('Opening file: "{}"'.format(file_path))
+            self.validate_environment_for_callback('BeforeOpenCheck')
 
-        get_deps_plugin.get_non_available_dependencies(file_path)
+            logger.info('Checking missing dependencies ...')
+            get_deps_plugin = artella.PluginsMgr().get_plugin_by_id('artella-plugins-getdependencies')
+            if not get_deps_plugin or not get_deps_plugin.is_loaded():
+                msg = 'Get Dependencies plugin is not loaded. Get dependencies functionality is not available!'
+                dcc.show_warning('Get Dependencies Plugin not available', msg)
+                logger.warning(msg)
+
+            get_deps_plugin.get_non_available_dependencies(file_path)
 
         OpenMaya.MScriptUtil.setBool(retcode, True)
 
