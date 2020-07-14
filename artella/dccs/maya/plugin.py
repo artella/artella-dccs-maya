@@ -139,16 +139,7 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
 
         self.validate_environment_for_callback('BeforeSave')
 
-        is_locked, _, _, _ = self.check_lock()
-        valid_lock = self.lock_file(force=True, show_dialogs=False)
-        if not valid_lock:
-            logger.error('Unable to checkout file. Paths cannot be updated automatically.')
-            return
-
         self.update_paths(show_dialogs=False, skip_save=True)
-
-        if not is_locked:
-            self.unlock_file(force=True)
 
     def _before_open_check(self, retcode, maya_file, client_data=None):
         """
