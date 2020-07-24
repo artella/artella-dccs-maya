@@ -200,7 +200,7 @@ def reference_scene(file_path, **kwargs):
                     '{} = file({}, reference=True, mergeNamespacesOnClash=False, namespace={})'.format(
                         rsp, file_path, namespace))
     except Exception as exc:
-        logger.log_exception(
+        logger.exception(
             'Exception raised when referencing file "{}" | {} | {}'.format(file_path, exc, traceback.format_exc()))
         return False
 
