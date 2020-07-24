@@ -308,4 +308,6 @@ def register_dcc_resource_path(resources_path):
     if not os.environ.get('XBMLANGPATH', None):
         os.environ['XBMLANGPATH'] = resources_path
     else:
-        os.environ['XBMLANGPATH'] = os.environ['XBMLANGPATH'] + os.pathsep + resources_path
+        paths = os.environ['XBMLANGPATH'].split(';')
+        if resources_path not in paths and os.path.normpath(resources_path) not in paths:
+            os.environ['XBMLANGPATH'] = os.environ['XBMLANGPATH'] + os.pathsep + resources_path
