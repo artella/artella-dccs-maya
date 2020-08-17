@@ -230,6 +230,16 @@ def pass_message_to_main_thread_fn():
     return utils.executeInMainThreadWithResult
 
 
+def eval_deferred(fn):
+    """
+    Evaluates given function in deferred mode
+
+    :param fn: function
+    """
+
+    return cmds.evalDeferred(fn)
+
+
 def is_batch():
     """
     Returns whether or not current DCC is being executed in batch mode (no UI)
