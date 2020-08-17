@@ -35,22 +35,33 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
 
         self._references_found = list()
 
-    def init(self, dev=False, show_dialogs=True):
+    def init(self, dev=False, show_dialogs=True, create_menu=True, create_callbacks=True, *args, **kwargs):
         """
         Initializes Artella DCC plugin
 
         :param bool dev: Whether plugin is initialized in development mode or not
         :param bool show_dialogs: Whether dialogs should appear during plugin initialization or not
-        :return: True if the initialization was successful; False otherwise
+        :param bool create_menu: Whether menu should be created or not
+        :param bool create_callbacks: Whether or not DCC callbacks should be created
+        :return: True if the initialization was successful; False otherwise.
         :rtype: bool
         """
 
         # Force Maya MEL stack trace on before we start using the plugin
         maya_utils.force_mel_stack_trace_on()
 
-        super(ArtellaMayaPlugin, self).init(dev=dev, show_dialogs=show_dialogs)
+        super(ArtellaMayaPlugin, self).init(
+            dev=dev, show_dialogs=show_dialogs, create_menu=create_menu, create_callbacks=create_callbacks,
+            *args, **kwargs)
 
-        # Register Maya specific callbacks
+    def setup_callbacks(self):
+        """
+        Setup DCC Artella callbacks
+        :return:
+        """
+
+        super(ArtellaMayaPlugin, self).setup_callbacks()
+
         callback.register(artella.Callbacks.AfterOpenCallback, self._after_open)
         callback.register(artella.Callbacks.SceneBeforeSaveCallback, self._before_save)
         callback.register(artella.Callbacks.BeforeOpenCheckCallback, self._before_open_check)
