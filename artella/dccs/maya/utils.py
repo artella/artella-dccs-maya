@@ -124,13 +124,15 @@ def is_reference_loaded(reference_node):
     return cmds.referenceQuery(reference_node, isLoaded=True)
 
 
-def get_reference_file(reference_node, without_copy_number=True):
+def get_reference_file(reference_node, without_copy_number=True, unresolved_name=False):
     """
     Returns the reference file associated with the given referenced object or reference node
 
     :param str reference_node: str, reference node to query
     :param bool without_copy_number: Flag that indicates that the file name returned will have or not a copy
         number (e.g. '{1}') appended to the end.
+    :param bool unresolved_name: Flag that indicates if the reference file path should be returned with environment
+        variables unresolved or not.
     :return: File path given node belongs to
     :rtype: str
     """
@@ -140,9 +142,29 @@ def get_reference_file(reference_node, without_copy_number=True):
             'Node "{}" is not a valid reference node or a node from a reference file!'.format(reference_node))
         return ''
 
-    ref_file = cmds.referenceQuery(reference_node, filename=True, wcn=without_copy_number)
+    ref_file = cmds.referenceQuery(
+        reference_node, filename=True, wcn=without_copy_number, unresolvedName=unresolved_name)
 
     return ref_file
+
+
+def get_reference_files(without_copy_number=True, unresolved_name=False):
+    """
+    Returns a list with all file paths of the reference nodes in current scene
+
+    :param bool without_copy_number: Flag that indicates that the file name returned will have or not a copy
+        number (e.g. '{1}') appended to the end.
+    :param bool unresolved_name: Flag that indicates if the reference file path should be returned with environment
+    variables unresolved or not.
+    :return: List of referenced nodes file paths
+    :rtype: list(str)
+    """
+
+    all_refs = list_references()
+    all_ref_files = [get_reference_file(
+        ref, without_copy_number=without_copy_number, unresolved_name=unresolved_name) for ref in all_refs]
+
+    return all_ref_files
 
 
 def replace_reference(reference_node, reference_file_path):
@@ -226,7 +248,37 @@ def reload_reference(reference_node):
     return is_loaded
 
 
-def reload_textures():
+def reload_textures(files_to_check=None):
+    """
+    Reloads all the textures of the current Maya scene
+    """
+
+    if not files_to_check:
+        reload_all_textures()
+    else:
+        files_to_check = [os.path.normpath(texture_to_check) for texture_to_check in files_to_check]
+        textures_to_update = list()
+
+        try:
+            cmds.waitCursor(state=True)
+            texture_files = cmds.ls(type="file")
+            for texture in texture_files:
+                texture_file_path = cmds.getAttr(texture + ".fileTextureName")
+                if not texture_file_path:
+                    continue
+                if os.path.normpath(texture_file_path) not in files_to_check:
+                    continue
+                textures_to_update.append(texture)
+            for texture in textures_to_update:
+                texture_file_path = cmds.getAttr(texture + ".fileTextureName")
+                cmds.setAttr(texture + ".fileTextureName", texture_file_path, type="string")
+        except Exception as exc:
+            logger.warning('Error while reloading textures: {}'.format(exc))
+        finally:
+            cmds.waitCursor(state=False)
+
+
+def reload_all_textures():
     """
     Reloads all the textures of the current Maya scene
     """
@@ -243,7 +295,32 @@ def reload_textures():
         cmds.waitCursor(state=False)
 
 
-def reload_dependencies():
+def reload_dependencies(files_to_check=None):
+    """
+    Reloads all the references nodes of the current Maya scene
+    """
+
+    if not files_to_check:
+        reload_all_dependencies()
+    else:
+        reference_nodes_to_reload = list()
+        files_to_check = [os.path.normpath(texture_to_check) for texture_to_check in files_to_check]
+        all_reference_nodes = list_references() or list()
+        for reference_node in all_reference_nodes:
+            reference_file_path = get_reference_file(reference_node)
+            if not reference_file_path:
+                continue
+            if not os.path.normpath(reference_file_path) in files_to_check:
+                continue
+            reference_nodes_to_reload.append(reference_node)
+        for ref_node in reference_nodes_to_reload:
+            try:
+                cmds.file(referenceNode=ref_node, loadReference=True)
+            except RuntimeError:
+                logger.warning('Impossible to reload reference: {}'.format(ref_node))
+
+
+def reload_all_dependencies():
     """
     Reloads all the references nodes of the current Maya scene
     """
