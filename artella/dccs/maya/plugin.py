@@ -209,12 +209,11 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
         if self.is_artella_path():
             self.validate_environment_for_callback('BeforeReferenceCheck')
 
-        # NOTE: With this code we can force the update of file paths when opening a reference file.
-        # For now it's disabled because it's something that maybe it's not interesting from an user perspective.
-
-        # raw_full_name = maya_file.rawFullName()
-        # convert_path = artella.DccPlugin().convert_path(raw_full_name)
-        # maya_file.setRawFullName(convert_path)
+            raw_full_name = maya_file.rawFullName()
+            if not artella.DccPlugin().is_path_translated(
+                    raw_full_name) and artella.DccPlugin().is_artella_path(raw_full_name):
+                convert_path = artella.DccPlugin().convert_path(raw_full_name)
+                maya_file.setRawFullName(convert_path)
 
         OpenMaya.MScriptUtil.setBool(retcode, True)
 
