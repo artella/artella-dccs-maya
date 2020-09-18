@@ -123,12 +123,20 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
                 continue
             file_path_editors[dir_name] = file_path_editor
 
+        converted_file_paths = list()
         for dir_name, file_path_editor in file_path_editors.items():
+            if not artella.DccPlugin().is_artella_path(dir_name):
+                continue
             i = 0
             while i < len(file_path_editor):
                 file_name = file_path_editor[i]
                 node_attr_name = file_path_editor[i + 1]
-                i += 2
+                try:
+                    reference_file_path = maya_utils.get_reference_file(node_attr_name, unresolved_name=True)
+                    if artella.DccPlugin().is_path_translated(reference_file_path):
+                        continue
+                finally:
+                    i += 2
                 maya_dir = artella.DccPlugin().translate_path(dir_name)
                 maya_file_path = utils.clean_path(os.path.join(dir_name, file_name))
                 translated_path = utils.clean_path(os.path.join(maya_dir, file_name))
@@ -139,26 +147,19 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
                 res = self._update_attr_path(node_attr_name, converted_path)
                 if not res:
                     valid_update = False
+                converted_file_paths.append(translated_path)
+                converted_file_paths.append(converted_path)
 
-        return valid_update
+        return valid_update, converted_file_paths
 
     def _update_attr_path(self, node_attr_name, file_path):
 
         node_name = node_attr_name.split('.')[0]
 
         if maya_utils.is_reference_node(node_name):
-            is_loaded = maya_utils.is_reference_loaded(node_name)
             valid_update = True
-            if is_loaded:
-                try:
-                    maya_utils.unload_reference(node_name)
-                except RuntimeError as exc:
-                    logger.error(
-                        'Encountered an error while attempting to unload reference file: "{}" | {}'.format(
-                            node_name, exc))
-                    valid_update = False
             try:
-                maya_utils.load_reference(file_path, node_name)
+                maya_utils.replace_reference(node_name, file_path)
             except RuntimeError as exc:
                 logger.error(
                     'Encountered an error while attempting to load reference file "{}" '
