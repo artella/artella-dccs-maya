@@ -73,8 +73,14 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
         Internal function that is called after update paths functionality is over.
         """
 
-        maya_utils.reload_textures()
-        maya_utils.reload_dependencies()
+        files_updated = kwargs.get('files_updated', list())
+        if not files_updated:
+            return
+
+        maya_utils.reload_textures(files_updated)
+
+        # Dependencies are already reloaded during update paths process
+        # maya_utils.reload_dependencies(files_updated)
 
     # ==============================================================================================================
     # FUNCTIONS
