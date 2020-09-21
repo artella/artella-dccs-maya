@@ -8,6 +8,7 @@ Module that contains Maya DCC plugin specific implementation
 from __future__ import print_function, division, absolute_import
 
 import os
+import json
 import logging
 
 import maya.cmds as cmds
@@ -34,6 +35,34 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
         super(ArtellaMayaPlugin, self).__init__(artella_drive_client=artella_drive_client)
 
         self._references_found = list()
+
+    def get_version(self, force_update=False):
+        """
+        Returns current DCC plugin version
+
+        :param bool force_update: Where or not force the update of the current Artella DCC plugin version
+        :return: Version in string format (MAJOR.MINOR.PATH) of the current Artella DCC plugin
+        :rtype: str or None
+        """
+
+        plugin_version = super(ArtellaMayaPlugin, self).get_version(force_update=force_update)
+
+        if not plugin_version or force_update:
+            version_var = self.get_version_variable_name()
+            artella_path = artella.__path__[0]
+            version_file_path = os.path.join(os.path.dirname(artella_path), 'plugin-version.json')
+            if os.path.isfile(version_file_path):
+                try:
+                    with open(version_file_path) as fh:
+                        version_data = json.load(fh)
+                        version_found = version_data.get('version', None)
+                        if version_found:
+                            os.environ[version_var] = str(version_found)
+                except Exception as exc:
+                    logger.error('Impossible to retrieve Artella {} Plugin version data: {}!'.format(dcc.name(), exc))
+            plugin_version = os.environ.get(version_var, None)
+
+        return plugin_version
 
     def init(self, dev=False, show_dialogs=True, create_menu=True, create_callbacks=True, *args, **kwargs):
         """
