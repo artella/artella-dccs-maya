@@ -33,6 +33,17 @@ def name():
     return 'maya'
 
 
+def nice_name():
+    """
+    Returns nice name of current DCC
+
+    :return: Returns formatted DCC name
+    :rtype: str
+    """
+
+    return 'Maya'
+
+
 def version():
     """
     Returns version of DCC application
