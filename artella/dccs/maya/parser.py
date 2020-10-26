@@ -37,7 +37,7 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
     def __init__(self):
         super(MayaSceneParser, self).__init__()
 
-    def parse(self, file_path=None):
+    def parse(self, file_path=None, show_dialogs=True):
         """
         Parses all the contents of the given file path looking for file paths
 
@@ -65,7 +65,7 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
             return list()
 
         with open(file_path, 'rb') as file_object:
-            parser.parse(file_object=file_object)
+            parser.parse(file_object=file_object, show_dialogs=show_dialogs)
 
         parsed_file_paths = [utils.clean_path(parsed_path) for parsed_path in parser.get_depend_paths()]
         if file_path in parsed_file_paths:
@@ -330,26 +330,31 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
             """
 
             self._stream = file_object
-            file_name = os.path.basename(self._stream.name)
+            # file_name = os.path.basename(self._stream.name)
 
-            if show_dialogs and qtutils.QT_AVAILABLE:
-                self._progress_splash = splash.ProgressSplashDialog()
-                self._progress_splash.set_progress_text('Please wait ...'.format(file_name))
-                self._progress_splash.start()
-
-            value = 0
+            # if show_dialogs and qtutils.QT_AVAILABLE:
+            #     self._progress_splash = splash.ProgressSplashDialog()
+            #     self._progress_splash.set_progress_text('Please wait ...'.format(file_name))
+            #     self._progress_splash.start()
+            #
+            # value = 0
             while self._parse_next_command():
-                value += 1
-                if value > 250:
-                    next_index = self._progress_splash.get_progress_value() + 1
-                    if next_index > 100:
-                        next_index = 1
-                    self._progress_splash.set_progress_value(next_index, 'Parsing file: {}'.format(file_name))
-                    QtWidgets.QApplication.instance().processEvents()
-                    value = 0
+                pass
 
-            if self._progress_splash:
-                self._progress_splash.close()
+            self._stream = None
+
+            #     if self._progress_splash:
+            #         value += 1
+            #         if value > 250:
+            #             next_index = self._progress_splash.get_progress_value() + 1
+            #             if next_index > 100:
+            #                 next_index = 1
+            #             self._progress_splash.set_progress_value(next_index, 'Parsing file: {}'.format(file_name))
+            #             QtWidgets.QApplication.instance().processEvents()
+            #             value = 0
+            #
+            # if self._progress_splash:
+            #     self._progress_splash.close()
 
         def _parse_next_command(self):
             """
@@ -390,9 +395,10 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
             :return:
             """
 
+            pass
+
             command, _, lines[0] = lines[0].partition(' ')
             command = command.lstrip()
-
             if not self.has_command(command):
                 return None
 
@@ -450,7 +456,7 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
         # PARSE
         # ==============================================================================================================
 
-        def parse(self, file_object):
+        def parse(self, file_object, show_dialogs=True):
             """
             Parses all the contents of the given file path looking for file paths
 
@@ -485,3 +491,9 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
 
 
 register.register_class('Parser', MayaSceneParser)
+
+
+if __name__ == '__main__':
+    file_paths = [r"D:\shorts\artella-files\06 Flight Assets\06 Flight Assets\Arc Dragon\arcTheDragon_v1.61.ma"]
+    for file_path in file_paths:
+        print(MayaSceneParser().parse(file_path))
