@@ -307,6 +307,18 @@ def get_installation_paths(versions=None):
     return installation_paths
 
 
+def is_udim_path(file_path):
+    """
+    Returns whether or not given file path is an UDIM one
+
+    :param str file_path: File path we want to check
+    :return: True if the given paths is an UDIM path; False otherwise.
+    :rtype: bool
+    """
+
+    return '<UDIM>' in file_path
+
+
 def execute_deferred(fn):
     """
     Executes given function in deferred mode (once DCC UI has been loaded)
