@@ -330,31 +330,29 @@ class MayaSceneParser(parser.AbstractSceneParser, object):
             """
 
             self._stream = file_object
-            # file_name = os.path.basename(self._stream.name)
+            file_name = os.path.basename(self._stream.name)
 
-            # if show_dialogs and qtutils.QT_AVAILABLE:
-            #     self._progress_splash = splash.ProgressSplashDialog()
-            #     self._progress_splash.set_progress_text('Please wait ...'.format(file_name))
-            #     self._progress_splash.start()
-            #
-            # value = 0
+            if show_dialogs and qtutils.QT_AVAILABLE:
+                self._progress_splash = splash.ProgressSplashDialog()
+                self._progress_splash.set_progress_text('Please wait ...'.format(file_name))
+                self._progress_splash.start()
+
+            value = 0
             while self._parse_next_command():
-                pass
+                if self._progress_splash:
+                    value += 1
+                    if value > 250:
+                        next_index = self._progress_splash.get_progress_value() + 1
+                        if next_index > 100:
+                            next_index = 1
+                        self._progress_splash.set_progress_value(next_index, 'Parsing file: {}'.format(file_name))
+                        QtWidgets.QApplication.instance().processEvents()
+                        value = 0
 
             self._stream = None
 
-            #     if self._progress_splash:
-            #         value += 1
-            #         if value > 250:
-            #             next_index = self._progress_splash.get_progress_value() + 1
-            #             if next_index > 100:
-            #                 next_index = 1
-            #             self._progress_splash.set_progress_value(next_index, 'Parsing file: {}'.format(file_name))
-            #             QtWidgets.QApplication.instance().processEvents()
-            #             value = 0
-            #
-            # if self._progress_splash:
-            #     self._progress_splash.close()
+            if self._progress_splash:
+                self._progress_splash.close()
 
         def _parse_next_command(self):
             """
