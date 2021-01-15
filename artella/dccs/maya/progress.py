@@ -11,14 +11,13 @@ import logging
 
 import maya.cmds as cmds
 
-import artella.register as register
 from artella.core.dcc import progress
 from artella.dccs.maya import utils
 
 logger = logging.getLogger('artella')
 
 
-class MayaProgressBar(progress.AbstractProgressBar, object):
+class MayaProgressBar(progress.BaseProgressBar, object):
     """
     Class that defines progress bar Maya functions
     """
@@ -332,6 +331,3 @@ class MayaProgressBar(progress.AbstractProgressBar, object):
         """
 
         logger.debug('{} - {}'.format(self._status, self._count))
-
-
-register.register_class('ProgressBar', MayaProgressBar)

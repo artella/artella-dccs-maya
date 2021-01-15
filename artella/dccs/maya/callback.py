@@ -7,7 +7,6 @@ Module that contains Maya DCC callback implementation
 
 from __future__ import print_function, division, absolute_import
 
-from artella import register
 from artella.core.dcc import callback
 
 import maya.OpenMaya as OpenMaya
@@ -127,6 +126,3 @@ class Callbacks(object):
         def unregister(cls, token):
             if token:
                 OpenMaya.MSceneMessage.removeCallback(token)
-
-
-register.register_class('Callbacks', Callbacks)

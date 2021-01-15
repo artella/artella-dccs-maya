@@ -16,16 +16,15 @@ import maya.mel as mel
 import maya.OpenMaya as OpenMaya
 
 import artella
-import artella.dcc as dcc
-import artella.register as register
-from artella.core import consts, callback, dccplugin
-from artella.core.utils import Singleton
+from artella import dcc
+from artella.core.dcc import callback
+from artella.core import consts, callbacks, plugins, dccplugin
 from artella.dccs.maya import utils as maya_utils
 
 logger = logging.getLogger('artella')
 
 
-class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
+class ArtellaMayaPlugin(dccplugin.BaseArtellaDccPlugin, object):
 
     # ==============================================================================================================
     # OVERRIDES
@@ -91,11 +90,11 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
 
         super(ArtellaMayaPlugin, self).setup_callbacks()
 
-        callback.register(artella.Callbacks.AfterOpenCallback, self._after_open)
-        callback.register(artella.Callbacks.SceneBeforeSaveCallback, self._before_save)
-        callback.register(artella.Callbacks.BeforeOpenCheckCallback, self._before_open_check)
-        callback.register(artella.Callbacks.AfterLoadReferenceCallback, self._after_load_reference)
-        callback.register(artella.Callbacks.BeforeCreateReferenceCheckCallback, self._before_reference_check)
+        callbacks.register(callback.Callbacks().AfterOpenCallback, self._after_open)
+        callbacks.register(callback.Callbacks().SceneBeforeSaveCallback, self._before_save)
+        callbacks.register(callback.Callbacks().BeforeOpenCheckCallback, self._before_open_check)
+        callbacks.register(callback.Callbacks().AfterLoadReferenceCallback, self._after_load_reference)
+        callbacks.register(callback.Callbacks().BeforeCreateReferenceCheckCallback, self._before_reference_check)
 
     def _post_update_paths(self, **kwargs):
         """
@@ -204,7 +203,7 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
             self.validate_environment_for_callback('BeforeOpenCheck')
 
             logger.info('Checking missing dependencies ...')
-            get_deps_plugin = artella.PluginsMgr().get_plugin_by_id('artella-plugins-getdependencies')
+            get_deps_plugin = plugins.get_plugin_by_id('artella-plugins-getdependencies')
             if not get_deps_plugin or not get_deps_plugin.is_loaded():
                 msg = 'Get Dependencies plugin is not loaded. Get dependencies functionality is not available!'
                 dcc.show_warning('Get Dependencies Plugin not available', msg)
@@ -239,18 +238,9 @@ class ArtellaMayaPlugin(dccplugin.ArtellaDccPlugin, object):
             self.validate_environment_for_callback('BeforeReferenceCheck')
 
             raw_full_name = maya_file.rawFullName()
-            if not artella.DccPlugin().is_path_translated(
-                    raw_full_name) and artella.DccPlugin().is_artella_path(raw_full_name):
-                convert_path = artella.DccPlugin().convert_path(raw_full_name)
+            if not dccplugin.DccPlugin().is_path_translated(
+                    raw_full_name) and dccplugin.DccPlugin().is_artella_path(raw_full_name):
+                convert_path = dccplugin.DccPlugin().convert_path(raw_full_name)
                 maya_file.setRawFullName(convert_path)
 
         OpenMaya.MScriptUtil.setBool(retcode, True)
-
-
-@Singleton
-class ArtellaMayaPluginSingleton(ArtellaMayaPlugin, object):
-    def __init__(self, artella_drive_client=None):
-        ArtellaMayaPlugin.__init__(self, artella_drive_client=artella_drive_client)
-
-
-register.register_class('DccPlugin', ArtellaMayaPluginSingleton)
