@@ -24,7 +24,7 @@ from artella.dccs.maya import utils as maya_utils
 logger = logging.getLogger('artella')
 
 
-class ArtellaMayaPlugin(dccplugin.BaseArtellaDccPlugin, object):
+class ArtellaMayaPlugin(dccplugin.BaseArtellaDccPlugin):
 
     # ==============================================================================================================
     # OVERRIDES
@@ -208,8 +208,8 @@ class ArtellaMayaPlugin(dccplugin.BaseArtellaDccPlugin, object):
                 msg = 'Get Dependencies plugin is not loaded. Get dependencies functionality is not available!'
                 dcc.show_warning('Get Dependencies Plugin not available', msg)
                 logger.warning(msg)
-
-            get_deps_plugin.get_non_available_dependencies(file_path)
+            else:
+                get_deps_plugin.get_non_available_dependencies(file_path)
 
         OpenMaya.MScriptUtil.setBool(retcode, True)
 
