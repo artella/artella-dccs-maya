@@ -25,11 +25,6 @@ logger = logging.getLogger('artella')
 
 
 class ArtellaMayaPlugin(dccplugin.BaseArtellaDccPlugin):
-
-    # ==============================================================================================================
-    # OVERRIDES
-    # ==============================================================================================================
-
     def __init__(self, artella_drive_client):
         super(ArtellaMayaPlugin, self).__init__(artella_drive_client=artella_drive_client)
 

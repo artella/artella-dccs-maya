@@ -78,7 +78,7 @@ def scene_name():
     return cmds.file(query=True, sceneName=True)
 
 
-def new_scene(force=True):
+def new_scene(force=True, **kwargs):
     """
     Creates a new scene inside DCC
     :param force: True to skip saving of the current opened DCC scene; False otherwise.
