@@ -181,7 +181,7 @@ class ArtellaMayaPlugin(dccplugin.BaseArtellaDccPlugin):
 
         self.update_paths(show_dialogs=False, skip_save=True)
 
-    def _before_open_check(self, retcode, maya_file, client_data=None):
+    def _before_open_check(self, maya_file, client_data=None):
         """
         Internal callback function that is called before a Maya scene is opened
 
@@ -206,7 +206,7 @@ class ArtellaMayaPlugin(dccplugin.BaseArtellaDccPlugin):
             else:
                 get_deps_plugin.get_non_available_dependencies(file_path)
 
-        OpenMaya.MScriptUtil.setBool(retcode, True)
+        return True
 
     def _after_load_reference(self, *args):
         """
@@ -220,7 +220,7 @@ class ArtellaMayaPlugin(dccplugin.BaseArtellaDccPlugin):
 
         self.validate_environment_for_callback('AfterLoadReference')
 
-    def _before_reference_check(self, retcode, maya_file, client_data=None):
+    def _before_reference_check(self, maya_file, client_data=None):
         """
         Internal callback function that is called before a Maya reference is opened
 
@@ -238,4 +238,4 @@ class ArtellaMayaPlugin(dccplugin.BaseArtellaDccPlugin):
                 convert_path = dccplugin.DccPlugin().convert_path(raw_full_name)
                 maya_file.setRawFullName(convert_path)
 
-        OpenMaya.MScriptUtil.setBool(retcode, True)
+        return True

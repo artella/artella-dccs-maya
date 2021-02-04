@@ -9,7 +9,7 @@ from __future__ import print_function, division, absolute_import
 
 from artella.core.dcc import callback
 
-import maya.OpenMaya as OpenMaya
+import maya.api.OpenMaya as OpenMaya
 
 
 class Callbacks(object):
