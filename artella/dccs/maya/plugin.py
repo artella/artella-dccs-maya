@@ -13,12 +13,11 @@ import logging
 
 import maya.cmds as cmds
 import maya.mel as mel
-import maya.OpenMaya as OpenMaya
 
 import artella
 from artella import dcc
 from artella.core.dcc import callback
-from artella.core import consts, callbacks, plugins, dccplugin
+from artella.core import consts, callbacks, plugins, dccplugin, utils
 from artella.dccs.maya import utils as maya_utils
 
 logger = logging.getLogger('artella')
@@ -190,7 +189,7 @@ class ArtellaMayaPlugin(dccplugin.BaseArtellaDccPlugin):
         :param dict client_data:
         """
 
-        file_path = maya_file.resolvedFullName()
+        file_path = utils.clean_path(maya_file.resolvedFullName())
 
         if self.is_artella_path(file_path):
 
