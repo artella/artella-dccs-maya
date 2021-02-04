@@ -118,7 +118,7 @@ class MayaSceneParserThreadPool(QtCore.QObject):
                 if file_extension == '.ma':
                     as_ascii_file = True
                     file_size = utils.get_file_size(file_path)
-                    if file_size > 20.0:
+                    if file_size > 60.0:        # 60MB
                         as_ascii_file = False
 
             if as_ascii_file:
