@@ -33,7 +33,6 @@ class MayaDownloaderWorker(QtCore.QRunnable):
         self._artella_drive_client = artella_drive_client
         self._file_paths = file_paths
 
-    @utils.timestamp
     def run(self):
         if not self._artella_drive_client or not self._file_paths:
             self.signals.finished.emit()

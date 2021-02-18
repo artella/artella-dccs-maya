@@ -45,7 +45,6 @@ class MayaSceneParserWorker(QtCore.QRunnable):
         self._projects_path = projects_path
         self._recursive = True
 
-    @utils.timestamp
     def run(self):
         out_dict = mayapy_parser.parse(
             self._file_path, projects_path=self._projects_path, recursive=self._recursive) or dict()
@@ -60,7 +59,6 @@ class MayaAsciiSceneParserWorker(QtCore.QRunnable):
 
         self._file_path = file_path
 
-    @utils.timestamp
     def run(self):
         ascii_parser = MayaAsciiParser()
         with open(self._file_path, 'rb') as file_object:
