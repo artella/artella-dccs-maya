@@ -43,7 +43,7 @@ class MayaDownloaderWorker(QtCore.QRunnable):
 
         # We force the waiting to a high value, otherwise Artella Drive Client will return that no download
         # is being processed
-        time.sleep(2.0)
+        time.sleep(3.5)
 
         while True:
             progress, fd, ft, bd, bt = self._artella_drive_client.get_progress()
