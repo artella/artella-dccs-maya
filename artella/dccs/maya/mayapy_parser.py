@@ -27,8 +27,8 @@ def parse(file_paths, projects_path=None, recursive=True):
                 if output_dict_str:
                     output_dict.update(json.loads(output_dict_str))
                     break
-    output_dict['maya_output'] = out_str
-    output_dict['maya_error'] = err_str
+    output_dict['log'] = out_str
+    output_dict['error'] = err_str
 
     return output_dict
 
@@ -69,12 +69,19 @@ def get_maya_install_folder(version):
 
 def get_mayapy_path(version=None):
 
+    python_executable = sys.executable
     if platform.system().lower() == 'windows':
-        python_executable = sys.executable
         if os.path.basename(python_executable) == 'mayapy.exe':
             return python_executable
         elif os.path.basename(python_executable) == 'maya.exe':
             maya_py_path = os.path.join(os.path.dirname(python_executable), 'mayapy.exe')
+            if os.path.isfile(maya_py_path):
+                return maya_py_path
+    elif platform.system().lower() == 'darwin':
+        if os.path.basename(python_executable) == 'mayapy':
+            return python_executable
+        elif os.path.basename(python_executable) == 'Maya':
+            maya_py_path = os.path.join(os.path.dirname(os.path.dirname(python_executable)), 'bin', 'mayapy')
             if os.path.isfile(maya_py_path):
                 return maya_py_path
 
