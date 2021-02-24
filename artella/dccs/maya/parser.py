@@ -221,9 +221,9 @@ class MayaSceneParser(QtCore.QObject, object):
 
                 if not success:
                     logger.error('Something went wrong while parsing dependencies of file: "{}"'.format(parsed_file))
-                    logger.error('Error message: {}'.format(msg))
+                    logger.error('Error message: {}'.format(error))
                     logger.error('Log message: {}'.format(log))
-                    logger.error('Maya output: \n{}'.format(error))
+                    logger.error('Maya output: \n{}'.format(msg))
                     continue
 
                 if msg:
