@@ -95,7 +95,7 @@ def get_mayapy_path(version=None):
 
 def run_python_script_in_maya(mayapy_path, python_script_file, environ=None, *args, **kwargs):
     if not mayapy_path or not os.path.isfile(mayapy_path):
-        raise Exception("{} is not a valid Maya Python interpreter path".format(mayapy_path))
+        return '', "{} is not a valid Maya Python interpreter path".format(mayapy_path)
 
     interpreter = mayapy_path
 
