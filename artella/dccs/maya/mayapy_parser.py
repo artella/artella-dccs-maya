@@ -1,11 +1,8 @@
 import os
 import sys
 import json
+import platform
 import logging
-try:
-    import winreg
-except ImportError:
-    import _winreg as winreg
 import subprocess
 
 logging.basicConfig(level=logging.INFO)
@@ -38,43 +35,59 @@ def parse(file_paths, projects_path=None, recursive=True):
 
 def get_maya_install_folder(version):
 
-    a_reg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
+    maya_location = None
+    if platform.system().lower() =='windows':
+        try:
+            import winreg
+        except ImportError:
+            import _winreg as winreg
+        a_reg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
 
-    value = None
-    try:
-        a_key = winreg.OpenKey(a_reg, r"SOFTWARE\Autodesk\Maya\{}\Setup\InstallPath".format(version))
-        value = winreg.QueryValueEx(a_key, 'MAYA_INSTALL_LOCATION')
-    except Exception:
-        return None
-    finally:
-        if not value:
+        value = None
+        try:
+            a_key = winreg.OpenKey(a_reg, r"SOFTWARE\Autodesk\Maya\{}\Setup\InstallPath".format(version))
+            value = winreg.QueryValueEx(a_key, 'MAYA_INSTALL_LOCATION')
+        except Exception:
             return None
-    maya_location = value[0]
-    if not maya_location:
-        return None
+        finally:
+            if not value:
+                return None
+        maya_location = value[0]
+        if not maya_location:
+            return None
+    elif platform.system().lower() == 'darwin':
+        maya_paths = ['/Applications/Maya {}/Maya.app', 'Library/Preferences/Autodesk/Maya/{}']
+        for maya_path in maya_paths:
+            maya_path = maya_path.format(version)
+            if not os.path.isdir(maya_path):
+                continue
+            maya_location = maya_path
+            break
 
     return maya_location
 
 
 def get_mayapy_path(version=None):
 
-    # TODO: This only works on Windows for now. Make it work also in MacOS
-
-    python_executable = sys.executable
-    if os.path.basename(python_executable) == 'mayapy.exe':
-        return python_executable
-    elif os.path.basename(python_executable) == 'maya.exe':
-        maya_py_path = os.path.join(os.path.dirname(python_executable), 'mayapy.exe')
-        if os.path.isfile(maya_py_path):
-            return maya_py_path
+    if platform.system().lower() == 'windows':
+        python_executable = sys.executable
+        if os.path.basename(python_executable) == 'mayapy.exe':
+            return python_executable
+        elif os.path.basename(python_executable) == 'maya.exe':
+            maya_py_path = os.path.join(os.path.dirname(python_executable), 'mayapy.exe')
+            if os.path.isfile(maya_py_path):
+                return maya_py_path
 
     maya_versions = [version] if version is not None else [2020, 2019, 2018, 2017]  # start with the newest one
     for maya_version in maya_versions:
         maya_install_path = get_maya_install_folder(maya_version)
         if not maya_install_path or not os.path.isdir(maya_install_path):
             continue
-        maya_py_path = os.path.join(maya_install_path, 'bin', 'mayapy.exe')
-        if not os.path.isfile(maya_py_path):
+
+        maya_py_path = None
+        if platform.system().lower() == 'windows':
+            maya_py_path = os.path.join(maya_install_path, 'bin', 'mayapy.exe')
+        if not maya_py_path or not os.path.isfile(maya_py_path):
             continue
 
         return maya_py_path
