@@ -94,6 +94,8 @@ def get_mayapy_path(version=None):
         maya_py_path = None
         if platform.system().lower() == 'windows':
             maya_py_path = os.path.join(maya_install_path, 'bin', 'mayapy.exe')
+        elif platform.system().lower() == 'darwin':
+            maya_py_path = os.path.join(maya_install_path, 'bin', 'mayapy')
         if not maya_py_path or not os.path.isfile(maya_py_path):
             continue
 
