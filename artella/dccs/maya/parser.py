@@ -263,23 +263,26 @@ class MayaSceneParser(QtCore.QObject, object):
         :return:
         """
 
+        valid_update = False
+        converted_file_paths = list()
+
         if not MAYA_AVAILBLE:
             logger.warning('Convert Paths functionality is only available if Maya instance is running!')
-            return False
+            return valid_update, converted_file_paths
 
         if not file_path:
             file_path = dcc.scene_name()
 
         if not file_path or not os.path.isfile(file_path):
             logger.warning('Given file to parse does not exists! Skipping convert paths process'.format(file_path))
-            return False
+            return valid_update, converted_file_paths
 
         file_ext = os.path.splitext(file_path)[-1]
         if file_ext not in dcc.extensions():
             logger.warning(
                 'Given file path has an invalid extension: {}. Supported extensions: {}'.format(
                     file_ext, dcc.extensions()))
-            return False
+            return valid_update, converted_file_paths
 
         if file_path != dcc.scene_name():
             dcc.open_scene(file_path, save=True)
@@ -288,7 +291,7 @@ class MayaSceneParser(QtCore.QObject, object):
         dirs = cmds.filePathEditor(query=True, listDirectories='')
         if not dirs:
             logger.debug('File "{}" has no paths to update!'.format(dirs))
-            return False
+            return valid_update, converted_file_paths
 
         valid_update = True
 
@@ -299,12 +302,11 @@ class MayaSceneParser(QtCore.QObject, object):
             except Exception as exc:
                 logger.error(
                     'Querying scene files in dir "{}" looking for dependent files: {}'.format(dir_name, exc))
-                return
+                return valid_update, converted_file_paths
             if not file_path_editor:
                 continue
             file_path_editors[dir_name] = file_path_editor
 
-        converted_file_paths = list()
         for dir_name, file_path_editor in file_path_editors.items():
             if not api.is_artella_path(dir_name):
                 continue
