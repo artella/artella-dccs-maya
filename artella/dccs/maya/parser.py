@@ -119,6 +119,10 @@ class MayaSceneParserThreadPool(QtCore.QObject):
                     if file_size > 60.0:        # 60MB
                         as_ascii_file = False
 
+            # In MacOS, we force the usage of the old parser
+            if sys.platform == 'darwin':
+                as_ascii_file = True
+
             if as_ascii_file:
                 worker = MayaAsciiSceneParserWorker(file_path)
             else:
