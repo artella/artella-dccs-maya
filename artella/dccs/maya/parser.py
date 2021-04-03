@@ -519,7 +519,7 @@ class MayaAsciiParser(object):
 
         lines = list()
 
-        line = self._stream.readline()
+        line = str(self._stream.readline())
         while True:
             if not line:
                 break
@@ -532,7 +532,7 @@ class MayaAsciiParser(object):
                     break
                 elif line:
                     lines.append(line)
-            line = self._stream.readline()
+            line = str(self._stream.readline())
 
         if lines:
             self._parse_command_lines(lines)
