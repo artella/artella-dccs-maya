@@ -117,14 +117,24 @@ class ArtellaMayaPlugin(dccplugin.BaseArtellaDccPlugin):
         :param str artella_local_root_path: current user Artella local root path
         """
 
+        if not artella_local_root_path:
+            logger.warning('No Project Path to setup. Skipping setup project ...')
+            return
+
+        artella_local_root_path = utils.clean_path(artella_local_root_path)
+        if utils.is_python2():
+            artella_local_root_path = artella_local_root_path.decode('utf-8')
         artella_local_root_path = cmds.encodeString(artella_local_root_path)
-        mel.eval('setProject "%s"' % artella_local_root_path.replace('\\', '\\\\'))
+        mel.eval('setProject "%s"' % artella_local_root_path.replace('\\', '/'))
         cmds.workspace(directory=artella_local_root_path)
         cmds.workspace(fileRule=['sourceImages', ''])
         cmds.workspace(fileRule=['scene', ''])
         cmds.workspace(fileRule=['mayaAscii', ''])
         cmds.workspace(fileRule=['mayaBinary', ''])
-        logger.info('Set Maya Workspace Path: {}'.format(artella_local_root_path))
+        if utils.is_python2():
+            logger.info('Set Maya Workspace Path: {}'.format(artella_local_root_path.encode('utf-8')))
+        else:
+            logger.info('Set Maya Workspace Path: {}'.format(artella_local_root_path))
 
     def validate_environment_for_callback(self, callback_name):
         """
