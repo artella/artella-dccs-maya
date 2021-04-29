@@ -121,6 +121,10 @@ class ArtellaMayaPlugin(dccplugin.BaseArtellaDccPlugin):
             logger.warning('No Project Path to setup. Skipping setup project ...')
             return
 
+        # This can happen when local root path cannot be retrieved from Artella Drive
+        if isinstance(artella_local_root_path, dict):
+            return
+
         artella_local_root_path = utils.clean_path(artella_local_root_path)
         if utils.is_python2():
             artella_local_root_path = artella_local_root_path.decode('utf-8')
