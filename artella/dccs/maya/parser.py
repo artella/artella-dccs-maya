@@ -61,6 +61,9 @@ class MayaAsciiSceneParserWorker(QtCore.QRunnable):
 
     def run(self):
         ascii_parser = MayaAsciiParser()
+
+        logger.debug('Trying to log Maya ASCII file: {}'.format(self._file_path))
+
         with open(self._file_path, 'rb') as file_object:
             ascii_parser.parse(file_object=file_object)
 
@@ -519,7 +522,7 @@ class MayaAsciiParser(object):
 
         lines = list()
 
-        line = str(self._stream.readline())
+        line = str(self._stream.readline().decode())
         while True:
             if not line:
                 break
@@ -532,7 +535,7 @@ class MayaAsciiParser(object):
                     break
                 elif line:
                     lines.append(line)
-            line = str(self._stream.readline())
+            line = str(self._stream.readline().decode())
 
         if lines:
             self._parse_command_lines(lines)
