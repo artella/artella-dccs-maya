@@ -206,7 +206,7 @@ def reference_scene(file_path, **kwargs):
                 namespace = os.path.basename(file_path)
                 split_name = namespace.split('.')
                 if split_name:
-                    namespace = string.join(split_name[:-1], '_')
+                    namespace = '_'.join(split_name[:-1])
                 rsp = cmds.file(file_path, reference=True, mergeNamespacesOnClash=False, namespace=namespace)
                 logger.debug(
                     '{} = file({}, reference=True, mergeNamespacesOnClash=False, namespace={})'.format(
